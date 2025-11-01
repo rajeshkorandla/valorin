@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator
 } from 'react-native';
-import Constants from 'expo-constants';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function InsuranceQuoteScreen({ navigation }) {
   const [formData, setFormData] = useState({
@@ -77,11 +77,7 @@ export default function InsuranceQuoteScreen({ navigation }) {
         insuranceType: selectedType,
       };
 
-      const apiUrl = Platform.OS === 'web' 
-        ? 'http://localhost:3000/api/quote-request'
-        : `http://${Constants.expoConfig?.hostUri?.split(':')[0]}:3000/api/quote-request`;
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch(API_ENDPOINTS.QUOTE_REQUEST, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

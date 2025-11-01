@@ -8,7 +8,7 @@ import {
   Platform,
   RefreshControl
 } from 'react-native';
-import Constants from 'expo-constants';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function SubmissionsScreen() {
   const [submissions, setSubmissions] = useState({
@@ -21,11 +21,7 @@ export default function SubmissionsScreen() {
 
   const fetchSubmissions = async () => {
     try {
-      const apiUrl = Platform.OS === 'web' 
-        ? 'http://localhost:3000/api/submissions'
-        : `http://${Constants.expoConfig?.hostUri?.split(':')[0]}:3000/api/submissions`;
-
-      const response = await fetch(apiUrl);
+      const response = await fetch(API_ENDPOINTS.SUBMISSIONS);
       const data = await response.json();
 
       if (data.success) {

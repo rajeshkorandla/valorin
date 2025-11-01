@@ -17,6 +17,23 @@ app.get('/', (req, res) => {
 
 app.post('/api/client-info', (req, res) => {
   try {
+    const { firstName, lastName, email, phone, address, city, state, zipCode } = req.body;
+    
+    if (!firstName || !lastName || !email || !phone || !address || !city || !state || !zipCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided'
+      });
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email address'
+      });
+    }
+    
     const clientData = {
       id: Date.now().toString(),
       ...req.body,
@@ -41,6 +58,31 @@ app.post('/api/client-info', (req, res) => {
 
 app.post('/api/quote-request', (req, res) => {
   try {
+    const { fullName, email, phone, insuranceType } = req.body;
+    
+    if (!fullName || !email || !phone || !insuranceType) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided'
+      });
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email address'
+      });
+    }
+    
+    const validInsuranceTypes = ['health', 'auto', 'life', 'property', 'business'];
+    if (!validInsuranceTypes.includes(insuranceType)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid insurance type'
+      });
+    }
+    
     const quoteData = {
       id: Date.now().toString(),
       ...req.body,

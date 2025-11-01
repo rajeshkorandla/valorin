@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator
 } from 'react-native';
-import Constants from 'expo-constants';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function ClientInfoScreen({ navigation }) {
   const [formData, setFormData] = useState({
@@ -88,11 +88,7 @@ export default function ClientInfoScreen({ navigation }) {
     setLoading(true);
 
     try {
-      const apiUrl = Platform.OS === 'web' 
-        ? 'http://localhost:3000/api/client-info'
-        : `http://${Constants.expoConfig?.hostUri?.split(':')[0]}:3000/api/client-info`;
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch(API_ENDPOINTS.CLIENT_INFO, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
