@@ -71,5 +71,7 @@ An Expo React Native + Web application for an insurance services business that p
 ## Recent Changes
 - November 1, 2025: Initial project setup with Expo and Express.js
 - Created all core screens with professional insurance-themed UI
-- Implemented form validation and API integration
+- Implemented client-side and server-side form validation
 - Cross-platform support for mobile and web
+- Centralized API configuration for better deployment compatibility
+- Added comprehensive README with deployment instructions
