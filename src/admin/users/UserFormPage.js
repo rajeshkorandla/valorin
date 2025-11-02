@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { ArrowLeft, Save, User, Mail, Phone, Building, Briefcase, Shield } from 'lucide-react';
+import { ArrowLeft, Save, User, Mail, Phone, Building, Briefcase, Shield, Lock, Eye, Activity } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser, useCreateUser, useUpdateUser, useDepartments } from '../hooks/useSupabase';
+import { useUser, useCreateUser, useUpdateUser, useDepartments, useRolePermissions, useUserPermissions, useUserActivityLog } from '../hooks/useSupabase';
 
 export default function UserFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
-
-  const { data: user, isLoading: loadingUser } = useUser(id);
-  const { data: departments } = useDepartments();
-  const createUser = useCreateUser();
-  const updateUser = useUpdateUser();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -28,6 +23,14 @@ export default function UserFormPage() {
     timezone: 'America/New_York',
     preferred_language: 'en',
   });
+
+  const { data: user, isLoading: loadingUser } = useUser(id);
+  const { data: departments } = useDepartments();
+  const { data: rolePermissions, isLoading: loadingRolePerms } = useRolePermissions(formData.role);
+  const { data: userPermissions, isLoading: loadingUserPerms } = useUserPermissions(id);
+  const { data: activityLog, isLoading: loadingActivity } = useUserActivityLog(id, 10);
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
 
   useEffect(() => {
     if (user) {
@@ -342,10 +345,127 @@ export default function UserFormPage() {
               </View>
             </View>
           </View>
+
+          {/* Permissions Management */}
+          {isEdit && (
+            <View style={styles.formSection}>
+              <View style={styles.sectionHeader}>
+                <Lock size={20} color="#3B82F6" />
+                <Text style={styles.sectionTitle}>Permissions</Text>
+              </View>
+
+              {/* Role Permissions */}
+              <View style={styles.permissionGroup}>
+                <Text style={styles.permissionGroupTitle}>Role-Based Permissions ({formData.role})</Text>
+                <Text style={styles.permissionGroupSubtitle}>
+                  These permissions are automatically granted based on the user's role
+                </Text>
+                {loadingRolePerms ? (
+                  <Text style={styles.loadingText}>Loading permissions...</Text>
+                ) : (
+                  <View style={styles.permissionList}>
+                    {rolePermissions?.map((perm) => (
+                      <View key={perm.permission_key} style={styles.permissionItem}>
+                        <Shield size={14} color="#10B981" />
+                        <Text style={styles.permissionName}>{perm.permission_key}</Text>
+                        <View style={styles.permissionBadge}>
+                          <Text style={styles.permissionBadgeText}>Role</Text>
+                        </View>
+                      </View>
+                    ))}
+                    {(!rolePermissions || rolePermissions.length === 0) && (
+                      <Text style={styles.noPermissions}>No role-based permissions defined</Text>
+                    )}
+                  </View>
+                )}
+              </View>
+
+              {/* Individual Permissions */}
+              <View style={styles.permissionGroup}>
+                <Text style={styles.permissionGroupTitle}>Additional User Permissions</Text>
+                <Text style={styles.permissionGroupSubtitle}>
+                  Grant specific permissions to this user beyond their role
+                </Text>
+                {loadingUserPerms ? (
+                  <Text style={styles.loadingText}>Loading permissions...</Text>
+                ) : (
+                  <>
+                    <View style={styles.permissionList}>
+                      {userPermissions?.map((perm) => (
+                        <View key={perm.permission_key} style={styles.permissionItem}>
+                          <Eye size={14} color="#3B82F6" />
+                          <Text style={styles.permissionName}>{perm.permission_key}</Text>
+                          <View style={[styles.permissionBadge, styles.permissionBadgeUser]}>
+                            <Text style={[styles.permissionBadgeText, styles.permissionBadgeTextUser]}>User</Text>
+                          </View>
+                        </View>
+                      ))}
+                      {(!userPermissions || userPermissions.length === 0) && (
+                        <Text style={styles.noPermissions}>No additional permissions granted</Text>
+                      )}
+                    </View>
+                    <TouchableOpacity style={styles.addPermissionButton}>
+                      <Text style={styles.addPermissionButtonText}>+ Add Permission</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Activity Log */}
+          {isEdit && (
+            <View style={styles.formSection}>
+              <View style={styles.sectionHeader}>
+                <Activity size={20} color="#3B82F6" />
+                <Text style={styles.sectionTitle}>Recent Activity</Text>
+              </View>
+
+              {loadingActivity ? (
+                <Text style={styles.loadingText}>Loading activity...</Text>
+              ) : (
+                <View style={styles.activityLog}>
+                  {activityLog?.map((log) => (
+                    <View key={log.id} style={styles.activityItem}>
+                      <View style={styles.activityIcon}>
+                        <View style={[styles.activityDot, { backgroundColor: getActivityColor(log.action_type) }]} />
+                      </View>
+                      <View style={styles.activityContent}>
+                        <Text style={styles.activityAction}>{log.action_type}</Text>
+                        <Text style={styles.activityDescription}>{log.description}</Text>
+                        <Text style={styles.activityTime}>
+                          {new Date(log.created_at).toLocaleString()}
+                        </Text>
+                        {log.ip_address && (
+                          <Text style={styles.activityIP}>IP: {log.ip_address}</Text>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+                  {(!activityLog || activityLog.length === 0) && (
+                    <Text style={styles.noActivity}>No recent activity</Text>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>
   );
+}
+
+// Helper function to get activity color
+function getActivityColor(actionType) {
+  const colors = {
+    'login': '#10B981',
+    'logout': '#6B7280',
+    'create': '#3B82F6',
+    'update': '#F59E0B',
+    'delete': '#EF4444',
+    'permission_change': '#8B5CF6',
+  };
+  return colors[actionType] || '#9CA3AF';
 }
 
 const styles = StyleSheet.create({
@@ -574,5 +694,129 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     marginTop: 48,
+  },
+  permissionGroup: {
+    marginBottom: 24,
+  },
+  permissionGroupTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  permissionGroupSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 12,
+  },
+  permissionList: {
+    gap: 8,
+  },
+  permissionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 6,
+  },
+  permissionName: {
+    flex: 1,
+    fontSize: 13,
+    color: '#374151',
+    fontFamily: 'monospace',
+  },
+  permissionBadge: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    backgroundColor: '#D1FAE5',
+    borderRadius: 4,
+  },
+  permissionBadgeText: {
+    fontSize: 11,
+    color: '#059669',
+    fontWeight: '600',
+  },
+  permissionBadgeUser: {
+    backgroundColor: '#DBEAFE',
+  },
+  permissionBadgeTextUser: {
+    color: '#2563EB',
+  },
+  noPermissions: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    paddingVertical: 12,
+    textAlign: 'center',
+  },
+  addPermissionButton: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  addPermissionButtonText: {
+    fontSize: 14,
+    color: '#3B82F6',
+    fontWeight: '500',
+  },
+  activityLog: {
+    gap: 12,
+  },
+  activityItem: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  activityIcon: {
+    width: 32,
+    alignItems: 'center',
+    paddingTop: 4,
+  },
+  activityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityAction: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 2,
+    textTransform: 'capitalize',
+  },
+  activityDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  activityTime: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  activityIP: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontFamily: 'monospace',
+    marginTop: 2,
+  },
+  noActivity: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    paddingVertical: 24,
+    textAlign: 'center',
   },
 });

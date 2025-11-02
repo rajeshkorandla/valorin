@@ -9,6 +9,8 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   
   const { data: users, isLoading } = useUsers();
   const deleteUserMutation = useDeleteUser();
@@ -54,6 +56,26 @@ export default function UsersPage() {
     
     return matchesSearch && matchesRole && matchesStatus;
   }) || [];
+
+  // Pagination
+  const totalUsers = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize));
+  const clampedPage = Math.max(1, Math.min(currentPage, totalPages));
+  const startIndex = (clampedPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, roleFilter, statusFilter]);
+
+  // Clamp currentPage when totalPages decreases (e.g., after deletion)
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(Math.max(1, totalPages));
+    }
+  }, [totalPages, currentPage]);
 
   if (isLoading) {
     return (
@@ -186,7 +208,7 @@ export default function UsersPage() {
               </Text>
             </View>
           ) : (
-            filteredUsers.map(user => (
+            paginatedUsers.map(user => (
               <View key={user.id} style={styles.tableRow}>
                 {/* User Info */}
                 <View style={[styles.tableCell, { flex: 2 }]}>
@@ -279,6 +301,108 @@ export default function UsersPage() {
             ))
           )}
         </View>
+
+        {/* Pagination */}
+        {totalUsers > 0 && totalPages > 1 && (
+          <View style={styles.paginationContainer}>
+            <View style={styles.paginationInfo}>
+              <Text style={styles.paginationText}>
+                Showing {startIndex + 1}-{Math.min(endIndex, totalUsers)} of {totalUsers} users
+              </Text>
+              <View style={styles.pageSizeSelector}>
+                <Text style={styles.pageSizeLabel}>Per page:</Text>
+                {[10, 25, 50, 100].map(size => (
+                  <TouchableOpacity
+                    key={size}
+                    style={[
+                      styles.pageSizeButton,
+                      pageSize === size && styles.pageSizeButtonActive
+                    ]}
+                    onPress={() => {
+                      setPageSize(size);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <Text style={[
+                      styles.pageSizeButtonText,
+                      pageSize === size && styles.pageSizeButtonTextActive
+                    ]}>
+                      {size}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            
+            <View style={styles.paginationControls}>
+              <TouchableOpacity
+                style={[
+                  styles.pageButton,
+                  clampedPage === 1 && styles.pageButtonDisabled
+                ]}
+                onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={clampedPage === 1}
+              >
+                <Text style={[
+                  styles.pageButtonText,
+                  clampedPage === 1 && styles.pageButtonTextDisabled
+                ]}>
+                  Previous
+                </Text>
+              </TouchableOpacity>
+
+              {/* Page Numbers */}
+              <View style={styles.pageNumbers}>
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 7) {
+                    pageNum = i + 1;
+                  } else if (clampedPage <= 4) {
+                    pageNum = i + 1;
+                  } else if (clampedPage >= totalPages - 3) {
+                    pageNum = totalPages - 6 + i;
+                  } else {
+                    pageNum = clampedPage - 3 + i;
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={pageNum}
+                      style={[
+                        styles.pageNumberButton,
+                        clampedPage === pageNum && styles.pageNumberButtonActive
+                      ]}
+                      onPress={() => setCurrentPage(pageNum)}
+                    >
+                      <Text style={[
+                        styles.pageNumberText,
+                        clampedPage === pageNum && styles.pageNumberTextActive
+                      ]}>
+                        {pageNum}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.pageButton,
+                  clampedPage === totalPages && styles.pageButtonDisabled
+                ]}
+                onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={clampedPage === totalPages}
+              >
+                <Text style={[
+                  styles.pageButtonText,
+                  clampedPage === totalPages && styles.pageButtonTextDisabled
+                ]}>
+                  Next
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -562,5 +686,109 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     marginTop: 48,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#F9FAFB',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  paginationInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    flexWrap: 'wrap',
+  },
+  paginationText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  pageSizeSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pageSizeLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  pageSizeButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    cursor: 'pointer',
+  },
+  pageSizeButtonActive: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
+  },
+  pageSizeButtonText: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  pageSizeButtonTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  paginationControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pageButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    cursor: 'pointer',
+  },
+  pageButtonDisabled: {
+    backgroundColor: '#F9FAFB',
+    cursor: 'not-allowed',
+  },
+  pageButtonText: {
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  pageButtonTextDisabled: {
+    color: '#D1D5DB',
+  },
+  pageNumbers: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  pageNumberButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  pageNumberButtonActive: {
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
+  },
+  pageNumberText: {
+    fontSize: 14,
+    color: '#374151',
+  },
+  pageNumberTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });
