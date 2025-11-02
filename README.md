@@ -60,6 +60,7 @@ A cross-platform mobile and web application built with Expo React Native for ins
 ### Prerequisites
 - Node.js 20 or higher
 - npm or yarn package manager
+- A Supabase account (free tier works fine)
 
 ### Installation
 
@@ -69,9 +70,55 @@ A cross-platform mobile and web application built with Expo React Native for ins
 npm install
 ```
 
+3. Install dotenv for local development:
+```bash
+npm install dotenv
+```
+
+### Setting Up Supabase
+
+1. **Create a Supabase Project**
+   - Go to https://supabase.com and sign up
+   - Create a new project
+   - Wait for the project to initialize (~2 minutes)
+
+2. **Set Up Database Tables**
+   - In Supabase dashboard, go to **SQL Editor**
+   - Open the `database-schema.sql` file from this project
+   - Copy and paste the SQL into the editor
+   - Click **Run** to create the tables
+
+3. **Get Your API Credentials**
+   - Go to **Settings** → **API** in Supabase dashboard
+   - Copy these values:
+     - **Project URL** (your `SUPABASE_URL`)
+     - **anon/public key** (your `SUPABASE_ANON_KEY`)
+     - **service_role key** (your `SUPABASE_SERVICE_ROLE_KEY`)
+
+4. **Create Environment Variables**
+   
+   **For Local Development (on your laptop):**
+   - Create a `.env` file in the root directory:
+   ```bash
+   SUPABASE_URL=your-supabase-project-url
+   SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+   SESSION_SECRET=any-random-string-here
+   ```
+   
+   **For Replit:**
+   - Open **Tools** → **Secrets** in Replit
+   - Add the same keys (without the `.env` file)
+
 ### Running the Application
 
-#### For Web Development
+#### For Web Development (Local Laptop)
+Start the backend server:
+```bash
+node server/index.js
+```
+
+In a new terminal, start the frontend:
 ```bash
 npm run web
 ```
@@ -142,15 +189,27 @@ To access the admin panel, you must create an admin user with the proper admin r
    ```
 7. Save the changes
 
-#### Method 2: Using Supabase SQL Editor
-Run this SQL query in your Supabase SQL Editor to grant admin role to an existing user:
+#### Method 2: Using Supabase SQL Editor (Easiest!)
+Since Supabase doesn't have a UI button to edit user metadata, use the SQL Editor instead:
+
+1. Go to **SQL Editor** in your Supabase dashboard (left sidebar)
+2. Click "New query"
+3. Run this SQL query to grant admin role to a user:
 ```sql
 UPDATE auth.users 
-SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}'::jsonb
+SET raw_user_meta_data = raw_user_meta_data || '{"role": "admin"}'::jsonb
 WHERE email = 'your-admin@example.com';
 ```
 
 **Important**: Replace `'your-admin@example.com'` with the actual email address of the user you want to make an admin.
+
+**Verify it worked:**
+```sql
+SELECT email, raw_user_meta_data 
+FROM auth.users 
+WHERE email = 'your-admin@example.com';
+```
+You should see `{"role": "admin"}` in the result.
 
 ### Accessing the Admin Panel
 1. From the home screen, scroll to the bottom and click "🔐 Admin Login"
