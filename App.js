@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
 import { AuthProvider } from './src/contexts/AuthContext';
 import HomeScreen from './src/screens/HomeScreen';
 import ClientInfoScreen from './src/screens/ClientInfoScreen';
@@ -12,10 +13,26 @@ import AdminSubmissionsScreen from './src/screens/AdminSubmissionsScreen';
 
 const Stack = createNativeStackNavigator();
 
+// Web URL configuration
+const linking = {
+  prefixes: [],
+  config: {
+    screens: {
+      Home: '',
+      ClientInfo: 'client-info',
+      InsuranceQuote: 'quote',
+      Submissions: 'submissions',
+      AdminLogin: 'admin',
+      AdminDashboard: 'admin/dashboard',
+      AdminSubmissions: 'admin/submissions',
+    },
+  },
+};
+
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer linking={Platform.OS === 'web' ? linking : undefined}>
         <Stack.Navigator
           initialRouteName="Home"
           screenOptions={{

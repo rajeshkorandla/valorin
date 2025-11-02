@@ -24,11 +24,20 @@ export default function AdminDashboardScreen({ navigation }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    // Wait for auth to load before checking authentication
+    if (!authLoading) {
+      if (!user) {
+        setError('Not authenticated. Please log in.');
+        setTimeout(() => navigation.replace('AdminLogin'), 2000);
+        setLoading(false);
+        return;
+      }
+      fetchStats();
+    }
+  }, [authLoading, user]);
 
   const fetchStats = async () => {
     try {
@@ -87,10 +96,13 @@ export default function AdminDashboardScreen({ navigation }) {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563EB" />
+        <Text style={styles.loadingText}>
+          {authLoading ? 'Checking authentication...' : 'Loading dashboard...'}
+        </Text>
       </View>
     );
   }
@@ -181,6 +193,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6B7280',
   },
   content: {
     padding: 20,
