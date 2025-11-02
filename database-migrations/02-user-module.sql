@@ -349,23 +349,23 @@ SELECT
   u.full_name,
   u.role,
   COALESCE(
-    json_agg(
+    jsonb_agg(
       DISTINCT jsonb_build_object(
         'permission', rp.permission_key,
         'source', 'role',
         'description', rp.description
       )
     ) FILTER (WHERE rp.permission_key IS NOT NULL),
-    '[]'::json
+    '[]'::jsonb
   ) || COALESCE(
-    json_agg(
+    jsonb_agg(
       DISTINCT jsonb_build_object(
         'permission', up.permission_key,
         'source', 'individual',
         'granted_at', up.granted_at
       )
     ) FILTER (WHERE up.permission_key IS NOT NULL),
-    '[]'::json
+    '[]'::jsonb
   ) as permissions
 FROM users u
 LEFT JOIN role_permissions rp ON u.role = rp.role
