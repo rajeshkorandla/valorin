@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
+import { supabase } from '../config/supabase';
 
 export default function AdminDashboardScreen({ navigation }) {
   const [stats, setStats] = useState({
@@ -27,8 +28,33 @@ export default function AdminDashboardScreen({ navigation }) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.SUBMISSIONS);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        Alert.alert('Error', 'Not authenticated');
+        navigation.replace('AdminLogin');
+        return;
+      }
+
+      const response = await fetch(API_ENDPOINTS.SUBMISSIONS, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       const data = await response.json();
+      
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          const message = response.status === 401 
+            ? 'Session Expired. Please log in again' 
+            : 'Access Denied. Admin privileges required.';
+          Alert.alert('Unauthorized', message);
+          await signOut();
+          navigation.replace('AdminLogin');
+          return;
+        }
+        throw new Error(data.message || 'Failed to fetch stats');
+      }
       
       if (data.success) {
         const clientsCount = data.data.clientSubmissions.length;
@@ -42,6 +68,7 @@ export default function AdminDashboardScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      Alert.alert('Error', 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }

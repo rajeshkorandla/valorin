@@ -2,12 +2,61 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { supabase } = require('./supabase');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const authenticateAdmin = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        message: 'No authorization token provided'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    
+    const userSupabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY
+    );
+    
+    const { data: { user }, error } = await userSupabase.auth.getUser(token);
+    
+    if (error || !user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
+      });
+    }
+    
+    const isAdmin = user.user_metadata?.role === 'admin' || 
+                    user.app_metadata?.role === 'admin';
+    
+    if (!isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    return res.status(401).json({
+      success: false,
+        message: 'Authentication failed'
+    });
+  }
+};
 
 app.get('/', (req, res) => {
   res.json({ message: 'Insurance Services API is running' });
@@ -142,7 +191,7 @@ app.post('/api/quote-request', async (req, res) => {
   }
 });
 
-app.get('/api/submissions', async (req, res) => {
+app.get('/api/submissions', authenticateAdmin, async (req, res) => {
   try {
     const [clientsResult, quotesResult] = await Promise.all([
       supabase
@@ -175,6 +224,70 @@ app.get('/api/submissions', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching submissions',
+      error: error.message
+    });
+  }
+});
+
+app.delete('/api/client-submissions/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { error } = await supabase
+      .from('client_submissions')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error deleting submission',
+        error: error.message
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Client submission deleted successfully'
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting submission',
+      error: error.message
+    });
+  }
+});
+
+app.delete('/api/quote-requests/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const { error } = await supabase
+      .from('quote_requests')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error deleting quote request',
+        error: error.message
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Quote request deleted successfully'
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting quote request',
       error: error.message
     });
   }

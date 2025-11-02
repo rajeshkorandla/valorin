@@ -12,8 +12,11 @@ import {
   RefreshControl
 } from 'react-native';
 import { API_ENDPOINTS } from '../config/api';
+import { supabase } from '../config/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
-export default function AdminSubmissionsScreen() {
+export default function AdminSubmissionsScreen({ navigation }) {
+  const { signOut } = useAuth();
   const [submissions, setSubmissions] = useState({
     clientSubmissions: [],
     quoteRequests: []
@@ -37,8 +40,33 @@ export default function AdminSubmissionsScreen() {
 
   const fetchSubmissions = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.SUBMISSIONS);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        Alert.alert('Error', 'Not authenticated');
+        navigation.replace('AdminLogin');
+        return;
+      }
+
+      const response = await fetch(API_ENDPOINTS.SUBMISSIONS, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
       const data = await response.json();
+      
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          const message = response.status === 401 
+            ? 'Session Expired. Please log in again' 
+            : 'Access Denied. Admin privileges required.';
+          Alert.alert('Unauthorized', message);
+          await signOut();
+          navigation.replace('AdminLogin');
+          return;
+        }
+        throw new Error(data.message || 'Failed to fetch submissions');
+      }
       
       if (data.success) {
         setSubmissions(data.data);
@@ -97,7 +125,7 @@ export default function AdminSubmissionsScreen() {
     });
   };
 
-  const handleDeleteClient = (id) => {
+  const handleDeleteClient = async (id) => {
     Alert.alert(
       'Delete Submission',
       'Are you sure you want to delete this client submission?',
@@ -106,19 +134,52 @@ export default function AdminSubmissionsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setSubmissions(prev => ({
-              ...prev,
-              clientSubmissions: prev.clientSubmissions.filter(item => item.id !== id)
-            }));
-            Alert.alert('Success', 'Submission deleted');
+          onPress: async () => {
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              
+              if (!session?.access_token) {
+                Alert.alert('Error', 'Not authenticated');
+                navigation.replace('AdminLogin');
+                return;
+              }
+
+              const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/client-submissions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`
+                }
+              });
+
+              if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                  const message = response.status === 401 
+                    ? 'Session Expired. Please log in again' 
+                    : 'Access Denied. Admin privileges required.';
+                  Alert.alert('Unauthorized', message);
+                  await signOut();
+                  navigation.replace('AdminLogin');
+                  return;
+                }
+                throw new Error('Failed to delete submission');
+              }
+
+              setSubmissions(prev => ({
+                ...prev,
+                clientSubmissions: prev.clientSubmissions.filter(item => item.id !== id)
+              }));
+              Alert.alert('Success', 'Submission deleted successfully');
+            } catch (error) {
+              console.error('Error deleting submission:', error);
+              Alert.alert('Error', 'Failed to delete submission');
+            }
           }
         }
       ]
     );
   };
 
-  const handleDeleteQuote = (id) => {
+  const handleDeleteQuote = async (id) => {
     Alert.alert(
       'Delete Quote Request',
       'Are you sure you want to delete this quote request?',
@@ -127,12 +188,45 @@ export default function AdminSubmissionsScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setSubmissions(prev => ({
-              ...prev,
-              quoteRequests: prev.quoteRequests.filter(item => item.id !== id)
-            }));
-            Alert.alert('Success', 'Quote request deleted');
+          onPress: async () => {
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              
+              if (!session?.access_token) {
+                Alert.alert('Error', 'Not authenticated');
+                navigation.replace('AdminLogin');
+                return;
+              }
+
+              const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/quote-requests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`
+                }
+              });
+
+              if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                  const message = response.status === 401 
+                    ? 'Session Expired. Please log in again' 
+                    : 'Access Denied. Admin privileges required.';
+                  Alert.alert('Unauthorized', message);
+                  await signOut();
+                  navigation.replace('AdminLogin');
+                  return;
+                }
+                throw new Error('Failed to delete quote request');
+              }
+
+              setSubmissions(prev => ({
+                ...prev,
+                quoteRequests: prev.quoteRequests.filter(item => item.id !== id)
+              }));
+              Alert.alert('Success', 'Quote request deleted successfully');
+            } catch (error) {
+              console.error('Error deleting quote request:', error);
+              Alert.alert('Error', 'Failed to delete quote request');
+            }
           }
         }
       ]

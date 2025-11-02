@@ -25,12 +25,26 @@ A cross-platform mobile and web application built with Expo React Native for ins
   - Timestamp tracking
   - Pull-to-refresh functionality
 
+### Admin Panel Features
+- **Secure Admin Authentication**: Login system powered by Supabase Auth
+- **Admin Dashboard**: Overview with statistics and quick actions
+  - Total client submissions count
+  - Total quote requests count
+  - Overall submission tracking
+- **Submissions Management**: Full CRUD operations for admin users
+  - View all client information submissions
+  - View all quote requests
+  - Search and filter submissions
+  - Delete submissions
+  - Pull-to-refresh functionality
+
 ### Technical Features
 - Cross-platform support (Android, iOS, and Web)
 - Professional insurance-themed UI design
 - Client-side and server-side form validation
 - Responsive design for all screen sizes
-- In-memory data storage (MVP - upgradeable to PostgreSQL)
+- **Supabase PostgreSQL database** for persistent storage
+- **Supabase Authentication** for admin panel security
 - RESTful API backend
 
 ## Tech Stack
@@ -38,7 +52,8 @@ A cross-platform mobile and web application built with Expo React Native for ins
 - **Frontend**: Expo (React Native for Web + Mobile)
 - **Navigation**: React Navigation
 - **Backend**: Express.js
-- **Data Storage**: In-memory (MVP phase)
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
 
 ## Getting Started
 
@@ -85,20 +100,70 @@ npm run server
 
 ```
 /
-├── App.js                          # Main app entry with navigation setup
-├── app.json                        # Expo configuration
-├── package.json                    # Dependencies and scripts
+├── App.js                            # Main app entry with navigation setup
+├── app.json                          # Expo configuration
+├── package.json                      # Dependencies and scripts
+├── database-schema.sql               # Database schema for Supabase
 ├── server/
-│   └── index.js                    # Express.js API server
+│   ├── index.js                      # Express.js API server
+│   └── supabase.js                   # Supabase client configuration
 └── src/
     ├── config/
-    │   └── api.js                  # API configuration and endpoints
+    │   ├── api.js                    # API configuration and endpoints
+    │   └── supabase.js               # Supabase client for frontend
+    ├── contexts/
+    │   └── AuthContext.js            # Authentication context provider
     └── screens/
-        ├── HomeScreen.js           # Home screen with navigation
-        ├── ClientInfoScreen.js     # Client information form
-        ├── InsuranceQuoteScreen.js # Insurance quote request form
-        └── SubmissionsScreen.js    # View submissions
+        ├── HomeScreen.js             # Home screen with navigation
+        ├── ClientInfoScreen.js       # Client information form
+        ├── InsuranceQuoteScreen.js   # Insurance quote request form
+        ├── SubmissionsScreen.js      # View submissions
+        ├── AdminLoginScreen.js       # Admin login screen
+        ├── AdminDashboardScreen.js   # Admin dashboard
+        └── AdminSubmissionsScreen.js # Admin submissions management
 ```
+
+## Admin Panel Access
+
+### Setting Up Admin Users
+To access the admin panel, you must create an admin user with the proper admin role in your Supabase project. **Admin access is granted ONLY to users with `"role": "admin"` in their metadata.**
+
+#### Method 1: Using Supabase Dashboard (Recommended)
+1. Go to your Supabase project dashboard
+2. Navigate to Authentication → Users
+3. Click "Add User" and create an account with your desired email and password
+4. After creating the user, click on the user in the list to edit
+5. Scroll to the "User Metadata" or "App Metadata" section
+6. Add the admin role to the metadata JSON:
+   ```json
+   {
+     "role": "admin"
+   }
+   ```
+7. Save the changes
+
+#### Method 2: Using Supabase SQL Editor
+Run this SQL query in your Supabase SQL Editor to grant admin role to an existing user:
+```sql
+UPDATE auth.users 
+SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}'::jsonb
+WHERE email = 'your-admin@example.com';
+```
+
+**Important**: Replace `'your-admin@example.com'` with the actual email address of the user you want to make an admin.
+
+### Accessing the Admin Panel
+1. From the home screen, scroll to the bottom and click "🔐 Admin Login"
+2. Enter your admin email and password
+3. Once logged in, you'll have access to:
+   - **Dashboard**: View submission statistics
+   - **Manage Submissions**: View, search, and delete client and quote submissions
+
+**Security Note**: 
+- Only users with `"role": "admin"` in their user_metadata or app_metadata can access admin endpoints
+- Regular users cannot access the admin panel even if they create an account
+- Admin role must be explicitly set via Supabase Dashboard or SQL - there are no shortcuts or bypasses
+- For maximum security, disable public signups in Supabase (Authentication → Settings → Auth Providers → Disable "Enable Email Signup")
 
 ## API Endpoints
 
@@ -106,13 +171,16 @@ npm run server
 
 - **POST** `/api/client-info` - Submit client information
   - Required fields: firstName, lastName, email, phone, address, city, state, zipCode
+  - Optional fields: dateOfBirth
+  - Stores data in Supabase `client_submissions` table
   
 - **POST** `/api/quote-request` - Submit insurance quote request
   - Required fields: fullName, email, phone, insuranceType
   - Optional fields: coverageAmount, additionalInfo
+  - Stores data in Supabase `quote_requests` table
   
 - **GET** `/api/submissions` - Retrieve all submissions
-  - Returns: clientSubmissions and quoteRequests arrays
+  - Returns: clientSubmissions and quoteRequests arrays from Supabase database
 
 ## Deployment
 
@@ -143,11 +211,24 @@ eas build --platform ios
 
 **Note**: Mobile app deployment requires an Expo account and EAS Build setup.
 
+## Database Setup
+
+This application uses Supabase as the database backend. To set up:
+
+1. Create a free account at [Supabase](https://supabase.com)
+2. Create a new project
+3. Run the SQL from `database-schema.sql` in the Supabase SQL Editor to create tables
+4. Get your project credentials from Settings → API
+5. Add the following environment variables:
+   - `SUPABASE_URL`: Your project URL
+   - `SUPABASE_ANON_KEY`: Your anon/public key
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your service role key (keep secret!)
+
+The app will automatically connect to your Supabase database.
+
 ## Future Enhancements
 
 ### Planned Features
-- PostgreSQL database for persistent storage
-- Admin dashboard for managing submissions
 - Document upload functionality for supporting documents
 - Email notifications on form submission
 - Client portal to track submission status
@@ -155,6 +236,9 @@ eas build --platform ios
 - Integration with insurance company APIs
 - Payment processing integration
 - Multi-language support
+- Advanced analytics and reporting in admin panel
+- Export submissions to CSV/PDF
+- Automated quote generation
 
 ## Browser Compatibility
 
