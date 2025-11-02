@@ -177,12 +177,18 @@ Required environment variables:
 ## Recent Changes
 
 ### November 2, 2025: Authentication & Security Enhancements
+- ✅ **Fixed Login Redirect Issue**: Desktop users now immediately see new admin UI after login instead of old dashboard
+  - Detects desktop web (width >= 1024px) and redirects to `/admin/dashboard`
+  - Uses full page reload to switch from Expo Navigation to React Router
+  - Mobile/tablet users continue using old dashboard (Expo Navigation)
+  - Platform-safe with proper window existence checks
 - ✅ **Fixed Signout Functionality**: AdminHeader now properly calls signOut() and redirects to home page
 - ✅ **Auto-Logout After Inactivity**: Automatic logout after 30 minutes of user inactivity
   - Tracks user activity (mouse, keyboard, scroll, touch events)
   - Resets timer on any user interaction
   - Shows alert message before logging out
   - Cleans up timers and event listeners on component unmount
+  - Web-only feature with proper platform guards
 - ✅ **User Display**: Header now shows actual user name and role from authentication session
 - ✅ **Database Migration Fix**: Fixed `json || json` operator error by changing to `jsonb` type in user_permissions_summary view
 

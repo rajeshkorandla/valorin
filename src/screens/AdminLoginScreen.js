@@ -29,10 +29,20 @@ export default function AdminLoginScreen({ navigation }) {
                       user?.app_metadata?.role === 'admin';
       
       if (isAdmin) {
-        navigation.replace('AdminDashboard');
+        // On desktop web (width >= 1024), redirect to new React Router admin UI
+        // This requires a full page navigation to switch from Expo nav to React Router
+        if (isDesktop) {
+          // isDesktop already includes Platform.OS === 'web' check (from useResponsive)
+          if (typeof window !== 'undefined') {
+            window.location.href = '/admin/dashboard';
+          }
+        } else {
+          // On mobile or tablet, use old Expo navigation
+          navigation.replace('AdminDashboard');
+        }
       }
     }
-  }, [authLoading, user, navigation]);
+  }, [authLoading, user, navigation, isDesktop]);
 
   const handleLogin = async () => {
     setError('');
@@ -58,7 +68,17 @@ export default function AdminLoginScreen({ navigation }) {
         return;
       }
       
-      navigation.replace('AdminDashboard');
+      // On desktop web (width >= 1024), redirect to new React Router admin UI
+      // This requires a full page navigation to switch from Expo nav to React Router
+      if (isDesktop) {
+        // isDesktop already includes Platform.OS === 'web' check (from useResponsive)
+        if (typeof window !== 'undefined') {
+          window.location.href = '/admin/dashboard';
+        }
+      } else {
+        // On mobile or tablet, use old Expo navigation
+        navigation.replace('AdminDashboard');
+      }
     } catch (error) {
       // Generic error message for failed login attempts
       if (error.message?.includes('Invalid login credentials')) {
