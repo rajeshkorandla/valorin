@@ -101,3 +101,35 @@ CREATE POLICY "Only admins can view admin users" ON admin_users
 -- Insert a default admin user (replace with your email)
 -- You'll need to create this user in Supabase Authentication first
 -- Then run: INSERT INTO admin_users (email) VALUES ('your-email@example.com');
+
+-- ============================================
+-- ADMIN USER SETUP INSTRUCTIONS
+-- ============================================
+
+-- Step 1: Create a user in Supabase Authentication
+-- Go to Authentication > Users > Add User
+-- Set email and password, enable "Auto Confirm User"
+
+-- Step 2: Update the user's metadata to grant admin role
+-- Replace 'admin@insurance.com' with your actual admin email
+UPDATE auth.users
+SET raw_user_meta_data = jsonb_set(
+  COALESCE(raw_user_meta_data, '{}'::jsonb),
+  '{role}',
+  '"admin"'
+)
+WHERE email = 'admin@insurance.com';
+
+-- Step 3: Add the user to admin_users table
+INSERT INTO admin_users (email)
+VALUES ('admin@insurance.com')
+ON CONFLICT (email) DO NOTHING;
+
+-- Verify the admin user was set up correctly:
+SELECT 
+  id,
+  email,
+  raw_user_meta_data->>'role' as role,
+  created_at
+FROM auth.users
+WHERE email = 'admin@insurance.com';
