@@ -6,7 +6,7 @@ const { supabase } = require('./supabase');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -294,6 +294,6 @@ app.delete('/api/quote-requests/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`Insurance Services API running on port ${PORT}`);
 });
