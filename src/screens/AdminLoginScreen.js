@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -19,8 +19,20 @@ export default function AdminLoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, signOut } = useAuth();
+  const { signIn, signOut, user, loading: authLoading } = useAuth();
   const { isDesktop } = useResponsive();
+
+  // Auto-redirect if already logged in with admin role
+  useEffect(() => {
+    if (!authLoading && user) {
+      const isAdmin = user?.user_metadata?.role === 'admin' || 
+                      user?.app_metadata?.role === 'admin';
+      
+      if (isAdmin) {
+        navigation.replace('AdminDashboard');
+      }
+    }
+  }, [authLoading, user, navigation]);
 
   const handleLogin = async () => {
     setError('');
@@ -60,6 +72,16 @@ export default function AdminLoginScreen({ navigation }) {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2563EB" />
+        <Text style={styles.loadingText}>Checking authentication...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -139,6 +161,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6B7280',
   },
   content: {
     padding: 20,
