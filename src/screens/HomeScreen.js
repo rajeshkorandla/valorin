@@ -8,66 +8,80 @@ import {
   Platform
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function HomeScreen({ navigation }) {
+  const { isDesktop } = useResponsive();
+
   return (
     <ScrollView style={styles.container}>
       <StatusBar style="light" />
       
-      <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Welcome to Our Insurance Services</Text>
-        <Text style={styles.heroSubtitle}>
-          Your trusted partner for comprehensive insurance solutions
-        </Text>
+      {isDesktop && <DesktopNavBar />}
+      
+      <View style={[styles.hero, isDesktop && styles.heroDesktop]}>
+        <View style={isDesktop && styles.heroContent}>
+          <Text style={[styles.heroTitle, isDesktop && styles.heroTitleDesktop]}>
+            Welcome to Our Insurance Services
+          </Text>
+          <Text style={[styles.heroSubtitle, isDesktop && styles.heroSubtitleDesktop]}>
+            Your trusted partner for comprehensive insurance solutions
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Get Started</Text>
-        <Text style={styles.sectionDescription}>
+      <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+        <Text style={[styles.sectionTitle, isDesktop && styles.sectionTitleDesktop]}>
+          Get Started
+        </Text>
+        <Text style={[styles.sectionDescription, isDesktop && styles.sectionDescriptionDesktop]}>
           Choose an option below to begin your insurance journey with us
         </Text>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('ClientInfo')}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>👤</Text>
-            <Text style={styles.cardTitle}>Client Information</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Register your personal details to get started with our services
-          </Text>
-          <Text style={styles.cardAction}>Get Started →</Text>
-        </TouchableOpacity>
+        <View style={isDesktop && styles.cardsGrid}>
+          <TouchableOpacity
+            style={[styles.card, isDesktop && styles.cardDesktop]}
+            onPress={() => navigation.navigate('ClientInfo')}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardIcon}>👤</Text>
+              <Text style={styles.cardTitle}>Client Information</Text>
+            </View>
+            <Text style={styles.cardDescription}>
+              Register your personal details to get started with our services
+            </Text>
+            <Text style={styles.cardAction}>Get Started →</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('InsuranceQuote')}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>📋</Text>
-            <Text style={styles.cardTitle}>Request a Quote</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Get a personalized insurance quote tailored to your needs
-          </Text>
-          <Text style={styles.cardAction}>Request Quote →</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.card, isDesktop && styles.cardDesktop]}
+            onPress={() => navigation.navigate('InsuranceQuote')}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardIcon}>📋</Text>
+              <Text style={styles.cardTitle}>Request a Quote</Text>
+            </View>
+            <Text style={styles.cardDescription}>
+              Get a personalized insurance quote tailored to your needs
+            </Text>
+            <Text style={styles.cardAction}>Request Quote →</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('Submissions')}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardIcon}>📝</Text>
-            <Text style={styles.cardTitle}>View Submissions</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Check the status of your submitted forms and requests
-          </Text>
-          <Text style={styles.cardAction}>View All →</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.card, isDesktop && styles.cardDesktop]}
+            onPress={() => navigation.navigate('Submissions')}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardIcon}>📝</Text>
+              <Text style={styles.cardTitle}>View Submissions</Text>
+            </View>
+            <Text style={styles.cardDescription}>
+              Check the status of your submitted forms and requests
+            </Text>
+            <Text style={styles.cardAction}>View All →</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>Our Insurance Partners</Text>
@@ -219,5 +233,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     fontWeight: '500',
+  },
+  heroDesktop: {
+    paddingVertical: 80,
+    paddingHorizontal: 40,
+  },
+  heroContent: {
+    maxWidth: 1200,
+    marginHorizontal: 'auto',
+    width: '100%',
+  },
+  heroTitleDesktop: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  heroSubtitleDesktop: {
+    fontSize: 20,
+    lineHeight: 30,
+  },
+  contentDesktop: {
+    maxWidth: 1200,
+    marginHorizontal: 'auto',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  sectionTitleDesktop: {
+    fontSize: 36,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  sectionDescriptionDesktop: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 48,
+  },
+  cardsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 24,
+    marginHorizontal: -12,
+  },
+  cardDesktop: {
+    flex: 1,
+    minWidth: 320,
+    marginHorizontal: 12,
+    marginBottom: 0,
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    cursor: 'pointer',
   },
 });

@@ -11,8 +11,11 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { API_ENDPOINTS } from '../config/api';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function ClientInfoScreen({ navigation }) {
+  const { isDesktop } = useResponsive();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -141,14 +144,16 @@ export default function ClientInfoScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Client Information Form</Text>
-        <Text style={styles.subtitle}>
+      {isDesktop && <DesktopNavBar />}
+      
+      <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+        <Text style={[styles.title, isDesktop && styles.titleDesktop]}>Client Information Form</Text>
+        <Text style={[styles.subtitle, isDesktop && styles.subtitleDesktop]}>
           Please fill in your personal details to get started
         </Text>
 
-        <View style={styles.form}>
-          <View style={styles.row}>
+        <View style={[styles.form, isDesktop && styles.formDesktop]}>
+          <View style={[styles.row, isDesktop && styles.rowDesktop]}>
             <View style={styles.halfWidth}>
               <Text style={styles.label}>First Name *</Text>
               <TextInput
@@ -377,5 +382,33 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  contentDesktop: {
+    maxWidth: 900,
+    marginHorizontal: 'auto',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  titleDesktop: {
+    fontSize: 42,
+    textAlign: 'center',
+  },
+  subtitleDesktop: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 48,
+  },
+  formDesktop: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 40,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+      },
+    }),
+  },
+  rowDesktop: {
+    gap: 24,
   },
 });

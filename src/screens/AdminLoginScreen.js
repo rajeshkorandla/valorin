@@ -7,15 +7,19 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Platform
+  Platform,
+  ScrollView
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function AdminLoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const { isDesktop } = useResponsive();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,16 +39,17 @@ export default function AdminLoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Admin Login</Text>
-          <Text style={styles.subtitle}>
+    <ScrollView style={styles.container}>
+      {isDesktop && <DesktopNavBar />}
+      <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+        <View style={[styles.header, isDesktop && styles.headerDesktop]}>
+          <Text style={[styles.title, isDesktop && styles.titleDesktop]}>Admin Login</Text>
+          <Text style={[styles.subtitle, isDesktop && styles.subtitleDesktop]}>
             Sign in to access the admin dashboard
           </Text>
         </View>
 
-        <View style={styles.form}>
+        <View style={[styles.form, isDesktop && styles.formDesktop]}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email Address</Text>
             <TextInput
@@ -96,7 +101,7 @@ export default function AdminLoginScreen({ navigation }) {
           </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -198,5 +203,29 @@ const styles = StyleSheet.create({
     color: '#92400E',
     fontSize: 14,
     textAlign: 'center',
+  },
+  contentDesktop: {
+    maxWidth: 500,
+    marginHorizontal: 'auto',
+    paddingVertical: 80,
+  },
+  headerDesktop: {
+    marginBottom: 40,
+  },
+  titleDesktop: {
+    fontSize: 42,
+  },
+  subtitleDesktop: {
+    fontSize: 18,
+  },
+  formDesktop: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 40,
+    ...Platform.select({
+      web: {
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+      },
+    }),
   },
 });

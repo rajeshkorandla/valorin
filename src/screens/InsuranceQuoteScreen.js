@@ -11,8 +11,11 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { API_ENDPOINTS } from '../config/api';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function InsuranceQuoteScreen({ navigation }) {
+  const { isDesktop } = useResponsive();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -135,8 +138,9 @@ export default function InsuranceQuoteScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Request Insurance Quote</Text>
+      {isDesktop && <DesktopNavBar />}
+      <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+        <Text style={[styles.title, isDesktop && styles.titleDesktop]}>Request Insurance Quote</Text>
         <Text style={styles.subtitle}>
           Get a personalized quote from our partner insurance companies
         </Text>
@@ -391,5 +395,15 @@ const styles = StyleSheet.create({
     color: '#92400E',
     fontSize: 14,
     lineHeight: 20,
+  },
+  contentDesktop: {
+    maxWidth: 900,
+    marginHorizontal: 'auto',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
+  },
+  titleDesktop: {
+    fontSize: 42,
+    textAlign: 'center',
   },
 });

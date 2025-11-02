@@ -12,8 +12,11 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
 import { supabase } from '../config/supabase';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function AdminDashboardScreen({ navigation }) {
+  const { isDesktop } = useResponsive();
   const [stats, setStats] = useState({
     totalClients: 0,
     totalQuotes: 0,
@@ -93,7 +96,8 @@ export default function AdminDashboardScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.content}>
+      {isDesktop && <DesktopNavBar />}
+      <View style={[styles.content, isDesktop && styles.contentDesktop]}>
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>Admin Dashboard</Text>
@@ -295,5 +299,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#2563EB',
+  },
+  contentDesktop: {
+    maxWidth: 1200,
+    marginHorizontal: 'auto',
+    paddingHorizontal: 40,
+    paddingVertical: 60,
   },
 });
