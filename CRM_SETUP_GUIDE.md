@@ -1,5 +1,8 @@
 # Insurance CRM Setup Guide
 
+## ✅ Migration Error Fixed!
+**Issue Resolved**: The database migration had a bug where it tried to create a function in the `auth` schema (not allowed in Supabase). This has been fixed - the migration now uses `public.user_role()` and is **ready to apply**.
+
 ## 🎉 What's Been Built
 
 You now have a comprehensive **Insurance CRM application** that combines:

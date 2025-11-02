@@ -1,5 +1,8 @@
 # Database Migrations
 
+## ✅ Ready to Apply!
+**Latest Update**: Fixed the `auth.user_role()` function error. The migration now correctly uses `public.user_role()` and is ready to run in Supabase.
+
 ## Overview
 This directory contains SQL migration files for the Insurance CRM database schema.
 

@@ -257,10 +257,10 @@ ALTER TABLE activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 
--- Helper function to check user role
-CREATE OR REPLACE FUNCTION auth.user_role()
+-- Helper function to check user role (in public schema, not auth)
+CREATE OR REPLACE FUNCTION public.user_role()
 RETURNS TEXT AS $$
-  SELECT role FROM users WHERE id = auth.uid();
+  SELECT role FROM public.users WHERE id = auth.uid();
 $$ LANGUAGE SQL SECURITY DEFINER;
 
 -- USERS table policies
@@ -268,13 +268,13 @@ CREATE POLICY "Users can view their own profile" ON users
   FOR SELECT USING (id = auth.uid());
 
 CREATE POLICY "Admins can view all users" ON users
-  FOR SELECT USING (auth.user_role() = 'admin');
+  FOR SELECT USING (public.user_role() = 'admin');
 
 CREATE POLICY "Admins can insert users" ON users
-  FOR INSERT WITH CHECK (auth.user_role() = 'admin');
+  FOR INSERT WITH CHECK (public.user_role() = 'admin');
 
 CREATE POLICY "Admins can update users" ON users
-  FOR UPDATE USING (auth.user_role() = 'admin');
+  FOR UPDATE USING (public.user_role() = 'admin');
 
 -- QUOTE_STATUSES policies (read-only for authenticated users)
 CREATE POLICY "Authenticated users can view statuses" ON quote_statuses
@@ -286,16 +286,16 @@ CREATE POLICY "Anyone can insert clients" ON clients
 
 CREATE POLICY "Staff can view clients" ON clients
   FOR SELECT USING (
-    auth.user_role() IN ('admin', 'manager', 'agent', 'viewer')
+    public.user_role() IN ('admin', 'manager', 'agent', 'viewer')
   );
 
 CREATE POLICY "Staff can update clients" ON clients
   FOR UPDATE USING (
-    auth.user_role() IN ('admin', 'manager', 'agent')
+    public.user_role() IN ('admin', 'manager', 'agent')
   );
 
 CREATE POLICY "Admins can delete clients" ON clients
-  FOR DELETE USING (auth.user_role() = 'admin');
+  FOR DELETE USING (public.user_role() = 'admin');
 
 -- QUOTES policies
 CREATE POLICY "Anyone can insert quotes" ON quotes
@@ -303,34 +303,34 @@ CREATE POLICY "Anyone can insert quotes" ON quotes
 
 CREATE POLICY "Staff can view all quotes" ON quotes
   FOR SELECT USING (
-    auth.user_role() IN ('admin', 'manager', 'viewer') OR
+    public.user_role() IN ('admin', 'manager', 'viewer') OR
     assigned_to = auth.uid()
   );
 
 CREATE POLICY "Staff can update quotes" ON quotes
   FOR UPDATE USING (
-    auth.user_role() IN ('admin', 'manager') OR
+    public.user_role() IN ('admin', 'manager') OR
     assigned_to = auth.uid()
   );
 
 CREATE POLICY "Admins can delete quotes" ON quotes
-  FOR DELETE USING (auth.user_role() = 'admin');
+  FOR DELETE USING (public.user_role() = 'admin');
 
 -- ACTIVITIES policies
 CREATE POLICY "Staff can view activities" ON activities
   FOR SELECT USING (
-    auth.user_role() IN ('admin', 'manager', 'agent', 'viewer')
+    public.user_role() IN ('admin', 'manager', 'agent', 'viewer')
   );
 
 CREATE POLICY "Staff can insert activities" ON activities
   FOR INSERT WITH CHECK (
-    auth.user_role() IN ('admin', 'manager', 'agent')
+    public.user_role() IN ('admin', 'manager', 'agent')
   );
 
 -- NOTES policies
 CREATE POLICY "Staff can view notes" ON notes
   FOR SELECT USING (
-    auth.user_role() IN ('admin', 'manager', 'agent', 'viewer')
+    public.user_role() IN ('admin', 'manager', 'agent', 'viewer')
   );
 
 CREATE POLICY "Staff can manage their own notes" ON notes
@@ -338,25 +338,25 @@ CREATE POLICY "Staff can manage their own notes" ON notes
 
 CREATE POLICY "Admins and managers can manage all notes" ON notes
   FOR ALL USING (
-    auth.user_role() IN ('admin', 'manager')
+    public.user_role() IN ('admin', 'manager')
   );
 
 -- TASKS policies
 CREATE POLICY "Staff can view tasks" ON tasks
   FOR SELECT USING (
-    auth.user_role() IN ('admin', 'manager', 'viewer') OR
+    public.user_role() IN ('admin', 'manager', 'viewer') OR
     assigned_to = auth.uid() OR
     created_by = auth.uid()
   );
 
 CREATE POLICY "Staff can create tasks" ON tasks
   FOR INSERT WITH CHECK (
-    auth.user_role() IN ('admin', 'manager', 'agent')
+    public.user_role() IN ('admin', 'manager', 'agent')
   );
 
 CREATE POLICY "Assigned users can update their tasks" ON tasks
   FOR UPDATE USING (
-    auth.user_role() IN ('admin', 'manager') OR
+    public.user_role() IN ('admin', 'manager') OR
     assigned_to = auth.uid()
   );
 
