@@ -6,8 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "server": "node server/index.js"
+    "web": "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY expo start --web --port 5000",
+    "server": "node server/index.js",
+    "dev": "npm run server & EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo start --web --port 5000"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",

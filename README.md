@@ -57,23 +57,35 @@ A cross-platform mobile and web application built with Expo React Native for ins
 
 ## Getting Started
 
+> **📖 Running Locally on Your Laptop?**  
+> Check out the **[LOCAL_SETUP.md](LOCAL_SETUP.md)** guide for step-by-step instructions!
+
 ### Prerequisites
-- Node.js 20 or higher
+- Node.js 18 or higher
 - npm or yarn package manager
 - A Supabase account (free tier works fine)
 
-### Installation
+### Quick Start
 
-1. Clone or download this project
-2. Install dependencies:
+1. **Clone or download this project**
+
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Install dotenv for local development:
+3. **Set up environment variables:**
+   - Copy `.env.example` to `.env`
+   - Add your Supabase credentials (see [Setting Up Supabase](#setting-up-supabase) below)
+
+4. **Run the app:**
 ```bash
-npm install dotenv
+npm run dev
 ```
+This starts both the backend API and frontend web app.
+
+5. **Open your browser:**  
+   Go to `http://localhost:5000`
 
 ### Setting Up Supabase
 
