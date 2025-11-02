@@ -1,0 +1,162 @@
+Absolutely — based on your boss’s document, here’s a high-level user role matrix showing all the user types (actors) in the Valorin Insurance ecosystem and what each can do across the major modules and features.
+
+⸻
+
+🧩 1. User Roles Overview
+
+Role	Description
+Employee / Internal User	Valorin staff (Account Managers, Underwriters, Admins, Sales, Service Teams) managing day-to-day operations.
+Client / Policyholder	End customers (businesses or individuals) who own or manage insurance policies.
+Vendor / MGA / Carrier Partner	Third-party insurance carriers, MGAs, or vendors integrated with Valorin for data exchange and commission management.
+System Administrator	Superuser controlling system setup, security, integrations, and global settings.
+AI / Automation Bot (System Actor)	Background service performing AI-driven recommendations, data syncs, and workflow automation.
+
+
+⸻
+
+👩‍💼 2. Employee / Internal User
+
+Purpose: Manage clients, policies, workflows, communication, and reporting.
+
+Core Capabilities:
+	•	CRM Management
+	•	Add/edit clients, leads, vendors, MGAs, and carriers.
+	•	Track all communications (calls, emails, WhatsApp, in-app chat).
+	•	Assign leads, opportunities, and renewals.
+	•	Task & Workflow Management
+	•	Use Kanban-style Task Board for task tracking.
+	•	Auto-assigned tasks from client requests or workflows.
+	•	Set reminders, due dates, and approvals.
+	•	Billing & Commission
+	•	Generate invoices and commission reports.
+	•	Sync transactions with QuickBooks.
+	•	Track payments, due dates, and commission splits.
+	•	Vendor & Carrier Integrations
+	•	Manage API or manual integrations with systems like AMS360, QQCatalyst, AgencyZoom, and Firefirm.
+	•	View connected carrier data and update credentials securely.
+	•	Document Management
+	•	Upload and tag documents to clients/policies.
+	•	Set access permissions.
+	•	Use Google Drive / AWS S3 integration.
+	•	Dashboards & Analytics
+	•	My Dashboard with KPIs: Active clients, renewals, pending COIs.
+	•	Access reports on sales, carrier performance, and client metrics.
+	•	Communication
+	•	In-app chat with team members or clients.
+	•	WhatsApp and VOIP integration for calls and notifications.
+	•	Automation & Forms
+	•	Manage workflows for COI, renewals, onboarding.
+	•	Approve or review client-submitted forms.
+
+⸻
+
+👤 3. Client / Policyholder
+
+Purpose: Self-manage policies, payments, documents, and requests.
+
+Core Capabilities:
+	•	Client Dashboard (Client 360)
+	•	View all personal/commercial/group policies in one place.
+	•	Get renewal alerts and AI-driven policy recommendations.
+	•	Policy & Account Management
+	•	Add or update policy information.
+	•	View payment and claim history.
+	•	Request Certificates of Insurance (COI).
+	•	Initiate policy audits and submit service requests.
+	•	Document Access
+	•	Download policy documents, COIs, invoices.
+	•	Upload required forms or compliance docs.
+	•	Payments
+	•	Make payments via Stripe, Plaid, or PayPal.
+	•	View billing statements and due dates.
+	•	Communication
+	•	Chat with assigned account manager via WhatsApp or in-app chat.
+	•	Receive automated notifications for renewals, approvals, etc.
+	•	AI Assistance
+	•	Receive personalized policy recommendations.
+	•	Use chatbot for FAQs, policy changes, COI requests.
+
+⸻
+
+🤝 4. Vendor / MGA / Carrier Partner
+
+Purpose: Manage their relationship with Valorin and share policy data.
+
+Core Capabilities:
+	•	Vendor Dashboard (Vendor 360)
+	•	View active clients, total policies, and monthly commissions.
+	•	Monitor renewal rates and carrier performance.
+	•	Integrations
+	•	Connect API or portal accounts (e.g., AMS360, QQCatalyst, Firefirm).
+	•	Share real-time policy, claim, and commission data.
+	•	Billing & Payments
+	•	Sync commission payments and settlements.
+	•	View shared invoices or commission splits.
+	•	Document Sharing
+	•	Upload or download shared compliance and policy documents.
+	•	Communication
+	•	Collaborate with Valorin team via in-app messaging or VOIP.
+	•	Receive task or renewal notifications.
+
+⸻
+
+🛠️ 5. System Administrator
+
+Purpose: Configure, secure, and maintain the entire platform.
+
+Core Capabilities:
+	•	User & Role Management
+	•	Create/manage employee, vendor, and client accounts.
+	•	Define Role-Based Access Control (RBAC) permissions.
+	•	Security & Compliance
+	•	Enforce OAuth 2.0 / SSO.
+	•	Manage encryption keys and credential vaults.
+	•	Maintain compliance (HIPAA, SOC 2, ISO 27001).
+	•	System Configuration
+	•	Manage integrations (QuickBooks, Twilio, WhatsApp API, etc.).
+	•	Configure AI and reporting tools (Power BI, Metabase).
+	•	Control workflow templates and form configurations.
+	•	Monitoring & Audit
+	•	Track system logs and user activity.
+	•	Manage audit trails for compliance.
+
+⸻
+
+🤖 6. AI & Automation Bot (System Actor)
+
+Purpose: Enhance efficiency and insights automatically.
+
+Core Functions:
+	•	Cross-Selling & Analytics
+	•	Identify coverage gaps and suggest upsells.
+	•	Predict renewal and churn risk.
+	•	Workflow Automation
+	•	Trigger service requests (COI, renewals, onboarding).
+	•	Auto-assign tasks based on client activity.
+	•	Reporting & Alerts
+	•	Generate dashboards and reports for KPIs.
+	•	Send proactive alerts for renewals, compliance, and payments.
+	•	Chatbot Interactions
+	•	Handle FAQs, COI generation, and simple client service requests.
+
+⸻
+
+🧭 7. Summary View — Feature Access Matrix
+
+Feature / Module	Employee	Client	Vendor / MGA	Admin	AI Bot
+CRM Management	✅	❌	❌	✅	❌
+Policy Management	✅	✅	✅	✅	✅
+Billing & Payments	✅	✅	✅	✅	✅
+Document Management	✅	✅	✅	✅	✅
+Workflow Automation	✅	✅	✅	✅	✅
+Dashboards	✅	✅	✅	✅	✅
+Communication (Chat, VOIP, WhatsApp)	✅	✅	✅	✅	✅
+AI Recommendations	✅	✅	✅	✅	✅
+Integrations (QuickBooks, AMS360, etc.)	✅	❌	✅	✅	✅
+User & Role Management	❌	❌	❌	✅	❌
+Compliance & Security	❌	❌	❌	✅	✅
+
+
+⸻
+
+Would you like me to expand this into a visual architecture diagram or user-journey flow map next (e.g., how each user interacts with modules)? It would make it easier to present this to stakeholders or include in design documentation.
