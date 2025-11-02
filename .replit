@@ -23,13 +23,13 @@ args = "api"
 name = "web"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npx expo start --web --port 5000"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo start --web --port 5000"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "api"
@@ -50,10 +50,6 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 38889
-externalPort = 3001
 
 [nix]
 channel = "stable-25_05"
