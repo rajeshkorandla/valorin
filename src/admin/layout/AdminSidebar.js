@@ -5,6 +5,7 @@ import {
   LayoutDashboard, 
   FileText, 
   Users, 
+  UserCog,
   CheckSquare, 
   Settings,
   BarChart3,
@@ -26,6 +27,11 @@ const navigation = [
     name: 'Clients',
     path: '/admin/clients',
     icon: Users,
+  },
+  {
+    name: 'User Management',
+    path: '/admin/users',
+    icon: UserCog,
   },
   {
     name: 'Tasks',

@@ -94,22 +94,6 @@ export function useQuoteStatuses() {
   });
 }
 
-export function useUsers() {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('is_active', true)
-        .order('full_name');
-
-      if (error) throw error;
-      return data || [];
-    },
-  });
-}
-
 export function useActivities(filters = {}) {
   return useQuery({
     queryKey: ['activities', filters],
@@ -229,6 +213,182 @@ export function useDashboardStats() {
         winRate,
         pipelineStats,
       };
+    },
+  });
+}
+
+// ============================================
+// USER MANAGEMENT HOOKS
+// ============================================
+
+export function useUsers(filters = {}) {
+  return useQuery({
+    queryKey: ['users', filters],
+    queryFn: async () => {
+      let query = supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (filters.role) {
+        query = query.eq('role', filters.role);
+      }
+
+      if (filters.status) {
+        query = query.eq('status', filters.status);
+      }
+
+      if (filters.department) {
+        query = query.eq('department', filters.department);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useUser(userId) {
+  return useQuery({
+    queryKey: ['user', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userData) => {
+      const { data, error } = await supabase
+        .from('users')
+        .insert([userData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const { data: updatedData, error } = await supabase
+        .from('users')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updatedData;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', data.id] });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId) => {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+}
+
+export function useDepartments() {
+  return useQuery({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useUserPermissions(userId) {
+  return useQuery({
+    queryKey: ['user_permissions', userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_permissions')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useRolePermissions(role) {
+  return useQuery({
+    queryKey: ['role_permissions', role],
+    enabled: !!role,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('role_permissions')
+        .select('*')
+        .eq('role', role);
+
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useUserActivityLog(userId, limit = 50) {
+  return useQuery({
+    queryKey: ['user_activity', userId, limit],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_activity_log')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
     },
   });
 }
