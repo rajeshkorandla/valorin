@@ -1,9 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../contexts/AuthContext';
+import AdminNavBar from './AdminNavBar';
 
 export default function DesktopNavBar() {
   const navigation = useNavigation();
+  const { user } = useAuth();
+
+  const isAdmin = user?.user_metadata?.role === 'admin' || 
+                  user?.app_metadata?.role === 'admin';
+
+  if (isAdmin) {
+    return <AdminNavBar />;
+  }
 
   return (
     <View style={styles.navbar}>

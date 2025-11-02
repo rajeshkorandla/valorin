@@ -14,9 +14,12 @@ import {
 import { API_ENDPOINTS } from '../config/api';
 import { supabase } from '../config/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useResponsive } from '../hooks/useResponsive';
+import DesktopNavBar from '../components/DesktopNavBar';
 
 export default function AdminSubmissionsScreen({ navigation }) {
   const { signOut } = useAuth();
+  const { isDesktop } = useResponsive();
   const [submissions, setSubmissions] = useState({
     clientSubmissions: [],
     quoteRequests: []
@@ -235,8 +238,11 @@ export default function AdminSubmissionsScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563EB" />
+      <View style={styles.container}>
+        {isDesktop && <DesktopNavBar />}
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#2563EB" />
+        </View>
       </View>
     );
   }
@@ -247,6 +253,7 @@ export default function AdminSubmissionsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {isDesktop && <DesktopNavBar />}
       <View style={styles.header}>
         <Text style={styles.title}>Manage Submissions</Text>
         <Text style={styles.subtitle}>
