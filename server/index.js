@@ -13,9 +13,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'Insurance Services API is running' });
 });
 
-app.post('/api/client-info', (req, res) => {
+app.post('/api/client-info', async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, address, city, state, zipCode } = req.body;
+    const { firstName, lastName, email, phone, address, city, state, zipCode, dateOfBirth } = req.body;
     
     if (!firstName || !lastName || !email || !phone || !address || !city || !state || !zipCode) {
       return res.status(400).json({
@@ -32,20 +32,41 @@ app.post('/api/client-info', (req, res) => {
       });
     }
     
-    const clientData = {
-      id: Date.now().toString(),
-      ...req.body,
-      submittedAt: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('client_submissions')
+      .insert([
+        {
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          phone,
+          date_of_birth: dateOfBirth,
+          address,
+          city,
+          state,
+          zip_code: zipCode,
+          submitted_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
     
-    clientSubmissions.push(clientData);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error submitting client information',
+        error: error.message
+      });
+    }
     
     res.status(201).json({
       success: true,
       message: 'Client information submitted successfully',
-      data: clientData
+      data
     });
   } catch (error) {
+    console.error('Server error:', error);
     res.status(500).json({
       success: false,
       message: 'Error submitting client information',
@@ -54,9 +75,9 @@ app.post('/api/client-info', (req, res) => {
   }
 });
 
-app.post('/api/quote-request', (req, res) => {
+app.post('/api/quote-request', async (req, res) => {
   try {
-    const { fullName, email, phone, insuranceType } = req.body;
+    const { fullName, email, phone, insuranceType, coverageAmount, additionalInfo } = req.body;
     
     if (!fullName || !email || !phone || !insuranceType) {
       return res.status(400).json({
@@ -81,20 +102,38 @@ app.post('/api/quote-request', (req, res) => {
       });
     }
     
-    const quoteData = {
-      id: Date.now().toString(),
-      ...req.body,
-      submittedAt: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('quote_requests')
+      .insert([
+        {
+          full_name: fullName,
+          email,
+          phone,
+          insurance_type: insuranceType,
+          coverage_amount: coverageAmount,
+          additional_info: additionalInfo,
+          submitted_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
     
-    quoteRequests.push(quoteData);
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error submitting quote request',
+        error: error.message
+      });
+    }
     
     res.status(201).json({
       success: true,
       message: 'Quote request submitted successfully',
-      data: quoteData
+      data
     });
   } catch (error) {
+    console.error('Server error:', error);
     res.status(500).json({
       success: false,
       message: 'Error submitting quote request',
@@ -103,14 +142,42 @@ app.post('/api/quote-request', (req, res) => {
   }
 });
 
-app.get('/api/submissions', (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      clientSubmissions,
-      quoteRequests
+app.get('/api/submissions', async (req, res) => {
+  try {
+    const [clientsResult, quotesResult] = await Promise.all([
+      supabase
+        .from('client_submissions')
+        .select('*')
+        .order('submitted_at', { ascending: false }),
+      supabase
+        .from('quote_requests')
+        .select('*')
+        .order('submitted_at', { ascending: false })
+    ]);
+    
+    if (clientsResult.error || quotesResult.error) {
+      console.error('Supabase error:', clientsResult.error || quotesResult.error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching submissions'
+      });
     }
-  });
+    
+    res.json({
+      success: true,
+      data: {
+        clientSubmissions: clientsResult.data || [],
+        quoteRequests: quotesResult.data || []
+      }
+    });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching submissions',
+      error: error.message
+    });
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
