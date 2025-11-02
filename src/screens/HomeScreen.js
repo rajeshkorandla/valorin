@@ -82,6 +82,13 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.bulletItem}>• Business Insurance</Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.adminLink}
+          onPress={() => navigation.navigate('AdminLogin')}
+        >
+          <Text style={styles.adminLinkText}>🔐 Admin Login</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -199,5 +206,18 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 8,
     lineHeight: 20,
+  },
+  adminLink: {
+    marginTop: 32,
+    marginBottom: 24,
+    padding: 16,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  adminLinkText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
   },
 });
