@@ -53,3 +53,7 @@ externalPort = 80
 deploymentTarget = "vm"
 run = ["node", "server/index.js"]
 build = ["sh", "-c", "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo export --platform web --output-dir dist"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["unzip"]
