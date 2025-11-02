@@ -49,6 +49,11 @@ externalPort = 3000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 41813
+externalPort = 3001
+
 [deployment]
-deploymentTarget = "cloudrun"
+deploymentTarget = "vm"
 run = ["node", "server/index.js"]
+build = ["sh", "-c", "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo export --platform web --output-dir dist"]
