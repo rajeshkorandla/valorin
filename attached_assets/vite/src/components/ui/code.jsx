@@ -73,5 +73,4 @@ function Code({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export { Code, codeVariants };

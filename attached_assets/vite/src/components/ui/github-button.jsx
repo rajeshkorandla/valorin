@@ -1,5 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
-/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -240,6 +238,7 @@ function GithubButton({
             className="fill-muted-foreground text-muted-foreground"
             aria-hidden="true"
           />
+
           <Star
             className="absolute top-0 start-0 text-yellow-400 fill-yellow-400"
             size={18}

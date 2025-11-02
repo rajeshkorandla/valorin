@@ -35,7 +35,10 @@ export function TypingText({
   ...props
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once, margin: inViewMargin });
+  const isInView = useInView(ref, {
+    once,
+    margin: inViewMargin,
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);

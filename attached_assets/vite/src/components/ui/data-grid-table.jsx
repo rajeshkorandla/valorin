@@ -127,7 +127,7 @@ function DataGridTableHeadRowCell({ children, header, dndRef, dndStyle }) {
         isLastLeftPinned ? 'left' : isFirstRightPinned ? 'right' : undefined
       }
       className={cn(
-        'relative h-10 text-left rtl:text-right align-middle font-normal text-accent-foreground [&:has([role=checkbox])]:pe-0',
+        'relative h-10 text-left rtl:text-right align-middle font-normal text-secondary-foreground/80 [&:has([role=checkbox])]:pe-0',
         headerCellSpacing,
         props.tableLayout?.cellBorder && 'border-e',
         props.tableLayout?.columnsResizable &&

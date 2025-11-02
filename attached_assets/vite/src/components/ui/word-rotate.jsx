@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -19,7 +18,10 @@ export function WordRotate({
   ...props
 }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once, margin: inViewMargin });
+  const isInView = useInView(ref, {
+    once,
+    margin: inViewMargin,
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentWord, setCurrentWord] = useState(0);
   const [show, setShow] = useState(true);

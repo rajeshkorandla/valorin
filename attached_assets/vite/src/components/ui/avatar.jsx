@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 'use client';
 
 import * as React from 'react';
@@ -12,7 +11,7 @@ const avatarStatusVariants = cva(
     variants: {
       variant: {
         online: 'bg-green-600',
-        offline: 'bg-zinc-600 dark:bg-zinc-300',
+        offline: 'bg-zinc-400 dark:bg-zinc-500',
         busy: 'bg-yellow-600',
         away: 'bg-blue-600',
       },
