@@ -49,10 +49,6 @@ externalPort = 3000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 42437
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "cloudrun"
 run = ["node", "server/index.js"]
