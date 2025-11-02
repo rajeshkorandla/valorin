@@ -44,25 +44,13 @@ waitForPort = 3000
 outputType = "console"
 
 [[ports]]
-localPort = 3000
-externalPort = 3001
-exposeLocalhost = true
-
-[[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5001
-externalPort = 3000
-
-[[ports]]
-localPort = 46731
-externalPort = 3002
 
 [nix]
 channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["sh", "-c", "node server/index.js & EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo start --web --port 5000 & wait"]
+build = ["sh", "-c", "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npx expo export:web"]
+run = ["node", "server/index.js"]
