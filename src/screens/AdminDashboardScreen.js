@@ -23,6 +23,7 @@ export default function AdminDashboardScreen({ navigation }) {
     recentSubmissions: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const { user, signOut } = useAuth();
 
   useEffect(() => {
@@ -34,8 +35,8 @@ export default function AdminDashboardScreen({ navigation }) {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
-        Alert.alert('Error', 'Not authenticated');
-        navigation.replace('AdminLogin');
+        setError('Not authenticated. Please log in.');
+        setTimeout(() => navigation.replace('AdminLogin'), 2000);
         return;
       }
 
@@ -49,11 +50,11 @@ export default function AdminDashboardScreen({ navigation }) {
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           const message = response.status === 401 
-            ? 'Session Expired. Please log in again' 
-            : 'Access Denied. Admin privileges required.';
-          Alert.alert('Unauthorized', message);
+            ? 'Session expired. Please log in again.' 
+            : 'Access denied. You do not have admin privileges.';
+          setError(message);
           await signOut();
-          navigation.replace('AdminLogin');
+          setTimeout(() => navigation.replace('AdminLogin'), 2000);
           return;
         }
         throw new Error(data.message || 'Failed to fetch stats');
@@ -71,7 +72,7 @@ export default function AdminDashboardScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
-      Alert.alert('Error', 'Failed to load dashboard data');
+      setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -82,7 +83,7 @@ export default function AdminDashboardScreen({ navigation }) {
       await signOut();
       navigation.replace('Home');
     } catch (error) {
-      Alert.alert('Error', 'Failed to log out');
+      setError('Failed to log out. Please try again.');
     }
   };
 
@@ -98,6 +99,13 @@ export default function AdminDashboardScreen({ navigation }) {
     <ScrollView style={styles.container}>
       {isDesktop && <DesktopNavBar />}
       <View style={[styles.content, isDesktop && styles.contentDesktop]}>
+        {error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>Admin Dashboard</Text>
@@ -299,6 +307,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#2563EB',
+  },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 4,
+    borderLeftColor: '#DC2626',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  errorIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  errorText: {
+    flex: 1,
+    color: '#991B1B',
+    fontSize: 14,
+    lineHeight: 20,
   },
   contentDesktop: {
     maxWidth: 1200,

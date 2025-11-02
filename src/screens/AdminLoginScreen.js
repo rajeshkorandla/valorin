@@ -18,21 +18,44 @@ export default function AdminLoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [error, setError] = useState('');
+  const { signIn, signOut } = useAuth();
   const { isDesktop } = useResponsive();
 
   const handleLogin = async () => {
+    setError('');
+    
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      setError('Please enter both email and password');
       return;
     }
 
     setLoading(true);
     try {
-      await signIn(email, password);
+      const { user } = await signIn(email, password);
+      
+      // Check if user has admin role
+      const isAdmin = user?.user_metadata?.role === 'admin' || 
+                      user?.app_metadata?.role === 'admin';
+      
+      if (!isAdmin) {
+        // Sign out non-admin user to avoid leaving an active session
+        await signOut();
+        setError('Access denied. You do not have admin privileges to access this area.');
+        setLoading(false);
+        return;
+      }
+      
       navigation.replace('AdminDashboard');
     } catch (error) {
-      Alert.alert('Login Failed', error.message || 'Invalid credentials');
+      // Generic error message for failed login attempts
+      if (error.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else if (error.message?.includes('Email not confirmed')) {
+        setError('Please confirm your email address before logging in.');
+      } else {
+        setError('Login failed. Please check your credentials and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -50,6 +73,13 @@ export default function AdminLoginScreen({ navigation }) {
         </View>
 
         <View style={[styles.form, isDesktop && styles.formDesktop]}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorIcon}>⚠️</Text>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email Address</Text>
             <TextInput
@@ -203,6 +233,26 @@ const styles = StyleSheet.create({
     color: '#92400E',
     fontSize: 14,
     textAlign: 'center',
+  },
+  errorBox: {
+    backgroundColor: '#FEE2E2',
+    borderLeftWidth: 4,
+    borderLeftColor: '#DC2626',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  errorIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  errorText: {
+    flex: 1,
+    color: '#991B1B',
+    fontSize: 14,
+    lineHeight: 20,
   },
   contentDesktop: {
     maxWidth: 500,
