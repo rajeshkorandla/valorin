@@ -1,10 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Menu, Bell, Search, LogOut, User } from 'lucide-react';
-import { AuthContext } from '../../contexts/AuthContext';
 
 export default function AdminHeader({ onMenuClick }) {
-  const { user, signOut } = useContext(AuthContext);
+  const handleSignOut = () => {
+    console.log('Sign out clicked');
+  };
 
   return (
     <View style={styles.header}>
@@ -33,13 +34,13 @@ export default function AdminHeader({ onMenuClick }) {
             <User size={16} color="#FFFFFF" />
           </View>
           <View>
-            <Text style={styles.userName}>{user?.email || 'Admin'}</Text>
+            <Text style={styles.userName}>Admin</Text>
             <Text style={styles.userRole}>Administrator</Text>
           </View>
         </View>
 
         {/* Sign Out */}
-        <TouchableOpacity onPress={signOut} style={styles.iconButton}>
+        <TouchableOpacity onPress={handleSignOut} style={styles.iconButton}>
           <LogOut size={20} color="#6B7280" />
         </TouchableOpacity>
       </View>
