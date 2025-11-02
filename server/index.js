@@ -2,14 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 const { supabase } = require('./supabase');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
 
 const authenticateAdmin = async (req, res, next) => {
   try {
@@ -59,7 +63,7 @@ const authenticateAdmin = async (req, res, next) => {
   }
 };
 
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ message: 'Insurance Services API is running' });
 });
 
@@ -294,6 +298,10 @@ app.delete('/api/quote-requests/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
-app.listen(PORT, '127.0.0.1', () => {
-  console.log(`Insurance Services API running on port ${PORT}`);
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Insurance Services running on port ${PORT}`);
 });
