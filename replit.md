@@ -176,6 +176,16 @@ Required environment variables:
 
 ## Recent Changes
 
+### November 2, 2025: Authentication & Security Enhancements
+- ✅ **Fixed Signout Functionality**: AdminHeader now properly calls signOut() and redirects to home page
+- ✅ **Auto-Logout After Inactivity**: Automatic logout after 30 minutes of user inactivity
+  - Tracks user activity (mouse, keyboard, scroll, touch events)
+  - Resets timer on any user interaction
+  - Shows alert message before logging out
+  - Cleans up timers and event listeners on component unmount
+- ✅ **User Display**: Header now shows actual user name and role from authentication session
+- ✅ **Database Migration Fix**: Fixed `json || json` operator error by changing to `jsonb` type in user_permissions_summary view
+
 ### November 2, 2025: User Management Module Complete
 - ✅ **Comprehensive User Module**: Complete CRUD operations for managing employees, clients, vendors, admins, and system users
 - ✅ **User Directory (UsersPage)**: 

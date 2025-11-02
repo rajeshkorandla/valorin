@@ -1,10 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Menu, Bell, Search, LogOut, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminHeader({ onMenuClick }) {
-  const handleSignOut = () => {
-    console.log('Sign out clicked');
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Failed to sign out. Please try again.');
+    }
   };
 
   return (
@@ -34,8 +45,12 @@ export default function AdminHeader({ onMenuClick }) {
             <User size={16} color="#FFFFFF" />
           </View>
           <View>
-            <Text style={styles.userName}>Admin</Text>
-            <Text style={styles.userRole}>Administrator</Text>
+            <Text style={styles.userName}>
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin'}
+            </Text>
+            <Text style={styles.userRole}>
+              {user?.user_metadata?.role || user?.app_metadata?.role || 'User'}
+            </Text>
           </View>
         </View>
 
