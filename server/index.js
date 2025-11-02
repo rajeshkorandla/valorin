@@ -1,15 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { supabase } = require('./supabase');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
-
-const clientSubmissions = [];
-const quoteRequests = [];
 
 app.get('/', (req, res) => {
   res.json({ message: 'Insurance Services API is running' });
